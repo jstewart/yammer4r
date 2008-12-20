@@ -5,10 +5,14 @@ def require_local(suffix)
 end
  
 require('rubygems')
+require('date')
 require('yaml')
 require('open-uri')
 require('json')
 require('oauth/consumer')
  
+require_local('ext/stdlib')
 require_local('yammer/client')
 require_local('yammer/message')
+require_local('yammer/message_list')
+require_local('yammer/user')

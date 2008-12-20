@@ -1,6 +1,8 @@
 class Yammer::Client
   
    URL = 'https://www.yammer.com'
+   
+   attr_reader :access_token
   
   def initialize
     config = YAML.load(open('oauth.yml'))
@@ -10,27 +12,45 @@ class Yammer::Client
     @access_token = OAuth::AccessToken.new(@consumer,@token,@secret)
   end
   
-  # { "message_type"=>"update", 
-  #   "created_at"=>"2008/12/19 20:43:48 +0000", 
-  #   "body"=>{"plain"=>"@sgoldberg Steve returned his laptop so I have another Macbook Pro in the office.", 
-  #            "parsed"=>"[[user:131808]] Steve returned his laptop so I have another Macbook Pro in the office."}, 
-  #   "client_type"=>"Web", 
-  #   "system_message"=>false, 
-  #   "url"=>"https://www.yammer.com/api/v1/messages/1672420", 
-  #   "id"=>1672420, 
-  #   "thread_id"=>1672420, 
-  #   "sender_type"=>"user", 
-  #   "sender_id"=>131802, 
-  #   "replied_to_id"=>nil, 
-  #   "web_url"=>"https://www.yammer.com/messages/1672420", 
-  #   "attachments"=>[], 
-  #   "client_url"=>nil }
-  
-  def messages
-    response = @access_token.get '/api/v1/messages.json'
-    JSON.parse(response.body)['messages'].map do |m|
+  def messages(action = :all)
+    response = case action
+      when :all:
+      @access_token.get "/api/v1/messages.json"
+      when :sent, :received, :following:
+      @access_token.get "/api/v1/messages/#{action}.json"
+      else
+      raise ArgumentError, "Invalid messaging action: #{action}"
+    end
+    parsed_response = JSON.parse(response.body)
+    older_available = parsed_response['meta']['older_available']
+    ml = parsed_response['messages'].map do |m|
       Yammer::Message.new(m)
     end
+    Yammer::MessageList.new(ml, older_available, self)
+  end
+  
+  def users
+    response = @access_token.get "/api/v1/users.json"
+    JSON.parse(response.body).map do |u|
+      Yammer::User.new(u, self)
+    end
+  end
+  
+  def user(id)
+    response = @access_token.get "/api/v1/users/#{id}.json"
+    u = JSON.parse(response.body)
+    Yammer::User.new(u, self)
+  end
+  
+  def me
+    @me ||= current_user
+  end
+  
+  private
+  def current_user
+    response = @access_token.get "/api/v1/users/current.json"
+    u = JSON.parse(response.body)
+    Yammer::User.new(u, self)
   end
   
 end

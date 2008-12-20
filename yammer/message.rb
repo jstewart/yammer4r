@@ -1,24 +1,26 @@
-# <message>
-#   <id>1102</id>
-#   <url>https://www.yammer.com/api/v1/messages/1102</url>
-#   <web-url>https://www.yammer.com/messages/1102</web-url>
-#   <replied-to-id>1101</replied-to-id>
-#   <thread-id>1101</thread-id>
-#   <body>
-#     <plain>I love #yammer.</plain>
-#     <parsed>I love [[tag:1000]].</parsed>
-#   </body>
-#   <message-type>update</message-type>
-#   <client-type>web</client-type>
-#   <sender-id>1002</sender-id>
-#   <sender-type>user</sender-type>
-#   <created-at>2008-09-12T17:35:43Z</created-at>
-# </message>
-
 class Yammer::Message
+  
+  attr_reader :id, :url, :web_url, :replied_to_id, :thread_id,
+              :body_plain, :body_parsed, :message_type, :client_type,
+              :sender_id, :sender_type
   
   def initialize(m)
     @id = m['id']
+    @url = m['url']
+    @web_url = m['web_url']
+    @replied_to_id = m['replied_to_id']
+    @thread_id = m['thread_id']
+    @body_plain = m['body']['plain']
+    @body_parsed = m['body']['parsed']
+    @message_type = m['message_type']
+    @client_type = m['client_type']
+    @sender_id = m['sender_id']
+    @sender_type = m['sender_type']
+    begin
+      @created_at = m['created_at']
+    rescue ArgumentError => e
+      @created_at = nil
+    end
   end
   
 end
