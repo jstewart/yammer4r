@@ -5,7 +5,7 @@ class Yammer::Client
   attr_reader :access_token
 
   def initialize(options={})
-    options.assert_has_keys(:consumer, :access) unless options.has_key?(:yaml_file)
+    options.assert_has_keys(:consumer) unless options.has_key?(:yaml_file)
     if options[:yaml_file]
       config              = YAML.load(open(options[:yaml_file]))
       options[:consumer]  = config['consumer'].symbolize_keys
@@ -13,7 +13,7 @@ class Yammer::Client
     end
 
     consumer = OAuth::Consumer.new(options[:consumer][:key], options[:consumer][:secret], :site => options[:site] || URL)
-    @access_token = OAuth::AccessToken.new(consumer, options[:access][:key], options[:access][:secret])
+    @access_token = OAuth::AccessToken.new(consumer, options[:access][:token], options[:access][:secret])
   end
 
   def messages(action = :all)
