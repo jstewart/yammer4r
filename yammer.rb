@@ -11,7 +11,7 @@ require('open-uri')
 require('json')
 require('oauth/consumer')
  
-require_local('ext/stdlib')
+require_local('ext/core_ext')
 require_local('yammer/client')
 require_local('yammer/message')
 require_local('yammer/message_list')
