@@ -1,10 +1,10 @@
 module Yammer
   class Client
-
     def initialize(options={})
       options.assert_has_keys(:consumer, :access) unless options.has_key?(:config)
       
-      @yammer_host = options.delete(:yammer_host) || "yammer.com"
+      yammer_url = options.delete(:yammer_host) || "https://yammer.com"
+      @api_path   = "/api/v1/"
 
       if options[:config]
         config              = YAML.load(open(options[:config]))
@@ -12,70 +12,80 @@ module Yammer
         options[:access]    = config['access'].symbolize_keys
       end
 
-      consumer = OAuth::Consumer.new(options[:consumer][:key], options[:consumer][:secret], :site => "https://#{@yammer_host}")
+      consumer = OAuth::Consumer.new(options[:consumer][:key], options[:consumer][:secret], :site => yammer_url)
       @access_token = OAuth::AccessToken.new(consumer, options[:access][:token], options[:access][:secret])
     end
 
 
     # TODO: modularize message and user handling 
+    def messages(action = :all, params = {})
+      params.merge!(:resource => :messages)
+      params.merge!(:action => action) unless action == :all
 
-    def messages(action = :all, params = nil)
-      http_method = (action == :new ? :post : :get)
-      url = case action
-                 when :all:
-                   "/api/v1/messages.json"
-                 when :sent, :received, :following:
-                   "/api/v1/messages/#{action}.json"
-                 when :new
-                   raise "Not implemented"
-                 when :from_user, :tagged_with, :in_thread
-                   raise "Not implemented"
-                 else
-                   raise ArgumentError, "Invalid messaging action: #{action}"
-                 end
-
-      response = handle_response(@access_token.send(http_method, url))
-       
-      parsed_response = JSON.parse(response.body)
+      parsed_response = JSON.parse(yammer_request(:get, params).body)
       older_available = parsed_response['meta']['older_available']
+
       ml = parsed_response['messages'].map do |m|
-        Yammer::Message.new(m)
+         Yammer::Message.new(m)
       end
-      Yammer::MessageList.new(ml, older_available, self)
+        Yammer::MessageList.new(ml, older_available, self)
+    end
+
+    # POST or DELETE a message
+    def message(action, params)
+      params.merge!(:resource => :messages)
+      yammer_request(action, params)
     end
 
     def users
-      response = handle_response(@access_token.get("/api/v1/users.json"))
-      JSON.parse(response.body).map do |u|
+      JSON.parse(yammer_request(:get, {:resource => :users}).body).map do |u|
         Yammer::User.new(u, self)
       end
     end
 
     def user(id)
-      response = handle_response(@access_token.get("/api/v1/users/#{id}.json"))
-      u = JSON.parse(response.body)
+      u = JSON.parse(yammer_request(:get, {:resource => :users, :id => id}).body)
       Yammer::User.new(u, self)
     end
 
     def current_user
-      response = handle_response(@access_token.get("/api/v1/users/current.json"))
-      u = JSON.parse(response.body)
+      u = JSON.parse(yammer_request(:get, {:resource => :users, :action => :current}).body)
       Yammer::User.new(u, self)
     end
     alias_method :me, :current_user
 
     private
 
+    def yammer_request(http_method, options)
+      request_uri = @api_path + options.delete(:resource).to_s
+      [:action, :id].each {|k| request_uri += "/#{options.delete(k)}" if options.has_key?(k) }
+      request_uri += ".json"
+
+      if options.any?
+        request_uri += "?#{create_query_string(options)}" unless http_method == :post
+      end
+
+      if http_method == :post
+        handle_response(@access_token.send(http_method, request_uri, options))
+      else
+        handle_response(@access_token.send(http_method, request_uri))
+      end
+    end
+
+    def create_query_string(options)
+      options.map {|k, v| "#{OAuth::Helper.escape(k)}=#{OAuth::Helper.escape(v)}"}.join('&')
+    end
+
     def handle_response(response)
       # TODO: Write classes for exceptions
-      case response.code
-        when '200'
+      case response.code.to_i
+        when 200..201
           response
-        when '400'
+        when 400
           raise "400 Bad request"
-        when '401'
+        when 401
           raise  "Authentication failed. Check your username and password"
-        when '503'
+        when 503
           raise "503: Service Unavailable"
         else
           raise "Error. HTTP Response #{response.code}"
