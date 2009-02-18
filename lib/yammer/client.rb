@@ -16,6 +16,9 @@ module Yammer
       @access_token = OAuth::AccessToken.new(consumer, options[:access][:token], options[:access][:secret])
     end
 
+
+    # TODO: modularize message and user handling 
+
     def messages(action = :all, params = nil)
       http_method = (action == :new ? :post : :get)
       url = case action
@@ -41,42 +44,27 @@ module Yammer
       Yammer::MessageList.new(ml, older_available, self)
     end
 
-    def post_message(body, reply_id=nil, attachments=[])
-      if attachments.size > 20
-        raise ArgumentError "Yammer prevents more than 20 attachments to a single message" 
-      end
-
-      encoded_attachments = attachments.inject({}) do |hsh, attachment|
-      end
-
-      post_opts = {:body => body, :reply_id => reply_id}.compact
-      raise post_opts.inspect
-      @access_token.post "/api/v1/messages", post_opts
-    end
-
     def users
-      response = @access_token.get "/api/v1/users.json"
+      response = handle_response(@access_token.get("/api/v1/users.json"))
       JSON.parse(response.body).map do |u|
         Yammer::User.new(u, self)
       end
     end
 
     def user(id)
-      response = @access_token.get "/api/v1/users/#{id}.json"
+      response = handle_response(@access_token.get("/api/v1/users/#{id}.json"))
       u = JSON.parse(response.body)
       Yammer::User.new(u, self)
     end
 
-    def me
-      @me ||= current_user
+    def current_user
+      response = handle_response(@access_token.get("/api/v1/users/current.json"))
+      u = JSON.parse(response.body)
+      Yammer::User.new(u, self)
     end
+    alias_method :me, :current_user
 
     private
-    def current_user
-      response = @access_token.get "/api/v1/users/current.json"
-      u = JSON.parse(response.body)
-      Yammer::User.new(u, self)
-    end
 
     def handle_response(response)
       # TODO: Write classes for exceptions
