@@ -9,7 +9,7 @@ require('date')
 require('yaml')
 require('open-uri')
 require('json')
-require('oauth/consumer')
+require('oauth')
  
 require_local('ext/core_ext')
 require_local('yammer/client')

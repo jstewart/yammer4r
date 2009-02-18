@@ -2,12 +2,13 @@ class Yammer::Client
 
   URL = 'https://www.yammer.com'
 
-  attr_reader :access_token
+  attr_accessor :access_token
 
   def initialize(options={})
-    options.assert_has_keys(:consumer) unless options.has_key?(:yaml_file)
-    if options[:yaml_file]
-      config              = YAML.load(open(options[:yaml_file]))
+    options.assert_has_keys(:consumer, :access) unless options.has_key?(:config)
+
+    if options[:config]
+      config              = YAML.load(open(options[:config]))
       options[:consumer]  = config['consumer'].symbolize_keys
       options[:access]    = config['access'].symbolize_keys
     end
@@ -33,6 +34,19 @@ class Yammer::Client
     Yammer::MessageList.new(ml, older_available, self)
   end
 
+  def post_message(body, reply_id=nil, attachments=[])
+    if attachments.size > 20
+      raise ArgumentError "Yammer prevents more than 20 attachments to a single message" 
+    end
+
+    encoded_attachments = attachments.inject({}) do |hsh, attachment|
+    end
+
+    post_opts = {:body => body, :reply_id => reply_id}.compact
+    raise post_opts.inspect
+    @access_token.post "/api/v1/messages", post_opts
+  end
+
   def users
     response = @access_token.get "/api/v1/users.json"
     JSON.parse(response.body).map do |u|
@@ -55,6 +69,10 @@ class Yammer::Client
     response = @access_token.get "/api/v1/users/current.json"
     u = JSON.parse(response.body)
     Yammer::User.new(u, self)
+  end
+
+  def encode attachment(attachment)
+    
   end
 
 end
