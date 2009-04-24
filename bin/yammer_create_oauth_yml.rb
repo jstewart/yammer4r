@@ -29,11 +29,11 @@ ARGV.options do |o|
   
   o.on("-o", "--outfile=[val]", String,
        "Yaml output file",
-       "Default: #{OPTIONS[:outfile]}")   { |OPTIONS[:outfile]| }
+       "Default: #{OPTIONS[:outfile]}")     { |OPTIONS[:outfile]| }
   o.on("-k", "--key=val", String,
-       "Consumer key for Yammer app")      { |key| OPTIONS[:key] = key}
+       "Consumer key for Yammer app")       { |key| OPTIONS[:key] = key}
   o.on("-s", "--secret=val", String,
-       "Consumer secret for Yammer app")      { |secret| OPTIONS[:secret] = secret}
+       "Consumer secret for Yammer app")    { |secret| OPTIONS[:secret] = secret}
   
   o.separator ""
 
@@ -48,10 +48,11 @@ end
 consumer      = OAuth::Consumer.new OPTIONS[:key], OPTIONS[:secret], {:site => YAMMER_OAUTH}
 request_token = consumer.get_request_token
 
-puts "Please visit the following URL in your browser to authorize your application, then press enter when done: #{request_token.authorize_url}"
-gets
-
-access_token = request_token.get_access_token
+puts "Please visit the following URL in your browser to authorize your application, then enter the 4 character security code when done: #{request_token.authorize_url}"
+callback_token =  gets
+response = consumer.token_request(consumer.http_method, (consumer.access_token_url? ? consumer.access_token_url : consumer.access_token_path),
+                                  request_token, {}, :callback_token =>  callback_token.chomp)
+access_token = OAuth::AccessToken.new(consumer,response[:oauth_token],response[:oauth_token_secret])
 
 oauth_yml = <<-EOT
 consumer:
