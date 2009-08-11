@@ -2,7 +2,11 @@ require('rubygems')
 require('date')
 require('yaml')
 require('open-uri')
+
+gem 'json', '>= 1.1.3'
 require('json')
+
+gem 'oauth', '>=0.2.7'
 require('oauth')
 
 $:.unshift(File.dirname(__FILE__))
