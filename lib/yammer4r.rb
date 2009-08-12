@@ -1,3 +1,4 @@
+require 'forwardable'
 require 'rubygems'
 require 'date'
 require 'yaml'

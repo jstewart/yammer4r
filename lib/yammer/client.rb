@@ -39,18 +39,18 @@ module Yammer
 
     def users
       JSON.parse(yammer_request(:get, {:resource => :users}).body).map do |u|
-        mash(u)
+        Yammer::User.new(mash(u), self)
       end
     end
 
     def user(id)
       u = JSON.parse(yammer_request(:get, {:resource => :users, :id => id}).body)
-      mash(u)
+      Yammer::User.new(mash(u), self)
     end
 
     def current_user
       u = JSON.parse(yammer_request(:get, {:resource => :users, :action => :current}).body)
-      mash(u)
+      Yammer::User.new(mash(u), self)
     end
     alias_method :me, :current_user
 
@@ -74,6 +74,10 @@ module Yammer
 
     def create_query_string(options)
       options.map {|k, v| "#{OAuth::Helper.escape(k)}=#{OAuth::Helper.escape(v)}"}.join('&')
+    end
+
+    def mash(json)
+      Mash.new(json)
     end
 
     def handle_response(response)
