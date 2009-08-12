@@ -15,7 +15,7 @@ OPTIONS = {
   :outfile  => 'oauth.yml'
 }
 
-YAMMER_OAUTH = "https://yammer.com" 
+YAMMER_OAUTH = "https://www.yammer.com" 
 
 ARGV.options do |o|
   script_name = File.basename($0)
@@ -49,9 +49,12 @@ consumer      = OAuth::Consumer.new OPTIONS[:key], OPTIONS[:secret], {:site => Y
 request_token = consumer.get_request_token
 
 puts "Please visit the following URL in your browser to authorize your application, then enter the 4 character security code when done: #{request_token.authorize_url}"
-callback_token =  gets
-response = consumer.token_request(consumer.http_method, (consumer.access_token_url? ? consumer.access_token_url : consumer.access_token_path),
-                                  request_token, {}, :callback_token =>  callback_token.chomp)
+oauth_verifier =  gets
+response = consumer.token_request(consumer.http_method, 
+                                  (consumer.access_token_url? ? consumer.access_token_url : consumer.access_token_path),
+                                  request_token, 
+                                  {}, 
+                                  :oauth_verifier =>  oauth_verifier.chomp)
 access_token = OAuth::AccessToken.new(consumer,response[:oauth_token],response[:oauth_token_secret])
 
 oauth_yml = <<-EOT

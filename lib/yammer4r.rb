@@ -3,10 +3,10 @@ require('date')
 require('yaml')
 require('open-uri')
 
-gem 'json', '>= 1.1.3'
+gem 'json', '>= 1.1.7'
 require('json')
 
-gem 'oauth', '>=0.2.7'
+gem 'oauth', '>=0.3.5'
 require('oauth')
 
 $:.unshift(File.dirname(__FILE__))
