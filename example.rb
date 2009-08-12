@@ -1,4 +1,4 @@
-require 'yammer'
+require 'yammer4r'
 
 config_path = File.dirname(__FILE__) + 'oauth.yml'
 yammer = Yammer::Client.new(:config => config_path)

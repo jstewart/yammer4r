@@ -26,7 +26,7 @@ module Yammer
       older_available = parsed_response['meta']['older_available']
 
       ml = parsed_response['messages'].map do |m|
-         Yammer::Message.new(m)
+         mash(m)
       end
         Yammer::MessageList.new(ml, older_available, self)
     end
@@ -39,18 +39,18 @@ module Yammer
 
     def users
       JSON.parse(yammer_request(:get, {:resource => :users}).body).map do |u|
-        Yammer::User.new(u, self)
+        mash(u)
       end
     end
 
     def user(id)
       u = JSON.parse(yammer_request(:get, {:resource => :users, :id => id}).body)
-      Yammer::User.new(u, self)
+      mash(u)
     end
 
     def current_user
       u = JSON.parse(yammer_request(:get, {:resource => :users, :action => :current}).body)
-      Yammer::User.new(u, self)
+      mash(u)
     end
     alias_method :me, :current_user
 
