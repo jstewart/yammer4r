@@ -3,7 +3,7 @@ module Yammer
     def initialize(options={})
       options.assert_has_keys(:consumer, :access) unless options.has_key?(:config)
       
-      yammer_url = options.delete(:yammer_host) || "https://yammer.com"
+      yammer_url = options.delete(:yammer_host) || "https://www.yammer.com"
       @api_path   = "/api/v1/"
 
       if options[:config]
