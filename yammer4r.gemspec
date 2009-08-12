@@ -18,13 +18,16 @@ Gem::Specification.new do |s|
     s.specification_version = 2
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<mash>, [">= 0.0.3"])
       s.add_runtime_dependency(%q<json>, [">= 1.1.7"])
       s.add_runtime_dependency(%q<oauth>, [">= 0.3.5"])
     else
+      s.add__dependency(%q<mash>, [">= 0.0.3"])
       s.add__dependency(%q<json>, [">= 1.1.7"])
       s.add__dependency(%q<oauth>, [">= 0.3.5"])
     end
   else
+    s.add__dependency(%q<mash>, [">= 0.0.3"])
     s.add__dependency(%q<json>, [">= 1.1.7"])
     s.add__dependency(%q<oauth>, [">= 0.3.5"])
   end
