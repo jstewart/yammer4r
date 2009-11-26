@@ -3,9 +3,31 @@ require 'ostruct'
 
 describe Yammer::Client do
   
-  it "can be created" do
-    Yammer::Client.new(:consumer => {}, :access => {}).should_not be_nil
-  end
+  context "creating" do
+  
+    before(:each) do
+      mock_consumer = mock(OAuth::Consumer)
+      OAuth::Consumer.stub!("new").and_return(mock_consumer)
+      @mock_http = mock("http")
+      mock_consumer.stub!("http").and_return(@mock_http)
+    end
+  
+    it "can be configured to be verbose" do
+      @mock_http.should_receive("set_debug_output").with($stderr)
+      Yammer::Client.new(:consumer => {}, :access => {}, :verbose => true)
+    end
+
+    it "should not be configured to be verbose unless asked to be" do
+      @mock_http.should_not_receive("set_debug_output")
+      Yammer::Client.new(:consumer => {}, :access => {})
+    end
+
+    it "should not be configured to be verbose if asked not to be" do
+      @mock_http.should_not_receive("set_debug_output")
+      Yammer::Client.new(:consumer => {}, :access => {}, :verbose => false)
+    end
+
+  end  
   
   context "users" do
     

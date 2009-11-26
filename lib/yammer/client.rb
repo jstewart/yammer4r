@@ -13,6 +13,7 @@ module Yammer
       end
 
       consumer = OAuth::Consumer.new(options[:consumer][:key], options[:consumer][:secret], :site => yammer_url)
+      consumer.http.set_debug_output($stderr) if options[:verbose] == true
       @access_token = OAuth::AccessToken.new(consumer, options[:access][:token], options[:access][:secret])
     end
 
