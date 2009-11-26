@@ -3,7 +3,7 @@ module Yammer
     def initialize(options={})
       options.assert_has_keys(:consumer, :access) unless options.has_key?(:config)
       
-      yammer_url = options.delete(:yammer_host) || "https://yammer.com"
+      yammer_url = options.delete(:yammer_host) || "https://www.yammer.com"
       @api_path   = "/api/v1/"
 
       if options[:config]
@@ -26,9 +26,9 @@ module Yammer
       older_available = parsed_response['meta']['older_available']
 
       ml = parsed_response['messages'].map do |m|
-         Yammer::Message.new(m)
+         mash(m)
       end
-        Yammer::MessageList.new(ml, older_available, self)
+      Yammer::MessageList.new(ml, older_available, self)
     end
 
     # POST or DELETE a message
@@ -39,18 +39,18 @@ module Yammer
 
     def users
       JSON.parse(yammer_request(:get, {:resource => :users}).body).map do |u|
-        Yammer::User.new(u, self)
+        Yammer::User.new(mash(u), self)
       end
     end
 
     def user(id)
       u = JSON.parse(yammer_request(:get, {:resource => :users, :id => id}).body)
-      Yammer::User.new(u, self)
+      Yammer::User.new(mash(u), self)
     end
 
     def current_user
       u = JSON.parse(yammer_request(:get, {:resource => :users, :action => :current}).body)
-      Yammer::User.new(u, self)
+      Yammer::User.new(mash(u), self)
     end
     alias_method :me, :current_user
 
@@ -74,6 +74,10 @@ module Yammer
 
     def create_query_string(options)
       options.map {|k, v| "#{OAuth::Helper.escape(k)}=#{OAuth::Helper.escape(v)}"}.join('&')
+    end
+
+    def mash(json)
+      Mash.new(json)
     end
 
     def handle_response(response)
