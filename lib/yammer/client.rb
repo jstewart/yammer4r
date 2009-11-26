@@ -37,10 +37,9 @@ module Yammer
       yammer_request(action, params)
     end
 
-    def users
-      JSON.parse(yammer_request(:get, {:resource => :users}).body).map do |u|
-        Yammer::User.new(mash(u), self)
-      end
+    def users(params = {})
+      params.merge!(:resource => :users)
+      JSON.parse(yammer_request(:get, params).body).map { |u| Yammer::User.new(mash(u), self) }
     end
 
     def user(id)
