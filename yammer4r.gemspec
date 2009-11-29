@@ -1,17 +1,30 @@
 Gem::Specification.new do |s|
-  s.name    = 'yammer4r'
-  s.version = '0.1.4'
-  s.date    = '2009-08-12'
+  s.name    = 'pmoran-yammer4r'
+  s.version = '0.1.5'
+  s.date    = '2009-12-29'
 
   s.summary = "Yammer access for ruby"
   s.description = "Yammer4R provides an object based API to query or update your Yammer account via pure Ruby.  It hides the ugly HTTP/REST code from your code."
 
-  s.authors  = ['Jim Patterson', 'Jason Stewart']
-  s.email    = 'jimp79@gmail.com'
-  s.homepage = 'http://github.com/jpatterson/yammer4r'
+  s.authors  = ['Jim Patterson', 'Jason Stewart', 'Peter Moran']
+  s.email    = 'workingpeter@gmail.com'
+  s.homepage = 'http://github.com/pmoran/yammer4r'
 
   s.has_rdoc = false
-  s.files = %w(README example.rb oauth.yml.template lib/yammer4r.rb lib/yammer/client.rb lib/yammer/message.rb lib/yammer/message_list.rb lib/yammer/user.rb lib/ext/core_ext.rb)
+  s.files = %w(README
+               example.rb
+               oauth.yml.template
+               Rakefile
+               TODO
+               bin/yammer_create_oauth_yml.rb
+               lib/yammer4r.rb
+               lib/yammer/client.rb
+               lib/yammer/message.rb
+               lib/yammer/message_list.rb
+               lib/yammer/user.rb
+               lib/ext/core_ext.rb
+               spec/spec_helper.rb
+               spec/yammer/client_spec.rb)
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
